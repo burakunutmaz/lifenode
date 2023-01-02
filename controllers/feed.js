@@ -5,6 +5,48 @@ const path = require('path');
 const Post = require('../models/post');
 const User = require('../models/user');
 
+exports.getStatus = (req,res,next) => {
+    User.findById(req.userId)
+    .then(user => {
+        if (!user){
+            const error = new Error('An error has occured!');
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({message: 'Fetched status', status: user.status});
+    })
+    .catch(err => {
+        if (!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    })
+};
+
+exports.postStatus = (req,res,next) => {
+    const status = req.body.status;
+    console.log(status);
+    User.findById(req.userId)
+        .then(user => {
+            if (!user){
+                const error = new Error('An error has occured!');
+                error.statusCode = 404;
+                throw error;
+            }
+            user.status = status;
+            return user.save();
+        })
+        .then(result => {
+            res.status(201).json({message: 'Status updated!'});
+        })
+        .catch(err => {
+            if (!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        })
+};
+
 exports.getPosts = (req,res,next) => {
     const currentPage = +req.query.page || 1;
     const postPerPage = 3;
@@ -165,9 +207,17 @@ exports.postDelete = (req, res, next) => {
             return Post.findByIdAndDelete(postId);
         })
         .then(result =>{
-            console.log(result);
+            return User.findById(req.userId);
+        })
+        .then(user => {
+            user.posts.pull(postId);
+            return user.save();
+        })
+        .then(result => {
             res.status(200).json({message: 'Deleted post!'});
         })
+
+
         .catch(err => {
             if (!err.statusCode){
                 err.statusCode = 500;
