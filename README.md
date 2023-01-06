@@ -14,4 +14,4 @@ General Info
 
 ### Screenshots
 
-> Test Results ![Screenshot](Screenshots/tests.png)
+> Test Results<br> ![Screenshot](Screenshots/tests.png)
