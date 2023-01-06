@@ -9,6 +9,7 @@ General Info
 ### Features
 * POST, GET AND PUT requests for -Login, Sign up, Update status, Create View and Delete post-
 * NoSQL Database system using MongoDB, Mongoose
+* Socket.io to simultaneously update every client when posts change.
 * Mocha and Chai for Unit Tests
 
 ### Screenshots
