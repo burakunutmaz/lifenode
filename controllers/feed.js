@@ -74,6 +74,7 @@ exports.getPosts = async (req,res,next) => {
 };
 
 exports.createPost = async (req,res,next) => {
+
     const errors = validationResult(req);
     if (!errors.isEmpty()){
         const error = new Error('Invalid input!');
@@ -85,7 +86,7 @@ exports.createPost = async (req,res,next) => {
         error.statusCode = 422;
         throw error;
     }
-    console.log(req.file.path);
+
     const imageUrl = req.file.path.replace("\\", "/");
     const title = req.body.title;
     const content = req.body.content;
@@ -96,17 +97,21 @@ exports.createPost = async (req,res,next) => {
         imageUrl: imageUrl,
         creator: req.userId
     });
+
     try {
+        
         const result = await post.save()
         const user = await User.findById(req.userId);
         user.posts.push(post);
-        await user.save();
+        const savedUser = await user.save();
         io.getIO().emit('posts', { action: 'create', post: {...post._doc, creator: {_id: req.userId, name: user.name}} });
         res.status(201).json({
             message: 'Post created successfully.',
             post: post,
             creator: {_id: user._id, name: user.name}}
         );
+        return savedUser;
+
     } catch(err) {
         if (!err.statusCode){
             err.statusCode = 500;
